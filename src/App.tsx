@@ -1,9 +1,13 @@
 import { useMemo, useState } from 'react'
+import { Layout, Spin, Empty, Button, Typography, Row, Col } from 'antd'
 import { Header } from './components/Header'
 import { Toolbar } from './components/Toolbar'
 import { CategorySection } from './components/CategorySection'
 import { TopicCard } from './components/TopicCard'
 import { useHubIndex } from './lib/useHubIndex'
+
+const { Content } = Layout
+const { Text, Link: AntLink, Title } = Typography
 
 export default function App() {
   const { data, state } = useHubIndex()
@@ -27,13 +31,7 @@ export default function App() {
       if (activeCategory !== 'all' && t.category !== activeCategory) return false
       if (!q) return true
       const prereqTitles = t.prerequisites.map((n) => topicsByNumber.get(n) ?? '').join(' ')
-      const haystack = [
-        t.title,
-        t.summary,
-        t.slug,
-        t.tags.join(' '),
-        prereqTitles,
-      ]
+      const haystack = [t.title, t.summary, t.slug, t.tags.join(' '), prereqTitles]
         .join(' ')
         .toLowerCase()
       return haystack.includes(q)
@@ -43,7 +41,7 @@ export default function App() {
   const updatedAt = state === 'success' && data.updatedAt ? data.updatedAt : null
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <Layout style={{ minHeight: '100vh', background: '#f5f7fa' }}>
       <Header
         topicCount={data.topics.length}
         categoryCount={data.categories.length}
@@ -51,7 +49,7 @@ export default function App() {
         updatedAt={updatedAt}
       />
 
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <Content style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px 48px', width: '100%' }}>
         <Toolbar
           query={query}
           onQueryChange={setQuery}
@@ -63,24 +61,24 @@ export default function App() {
         />
 
         {state === 'loading' && (
-          <div className="flex items-center justify-center py-24 text-slate-400">
-            <Spinner /> <span className="ml-3 text-sm">加载知识点索引…</span>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '96px 0' }}>
+            <Spin tip="加载知识点索引…" />
           </div>
         )}
 
         {state !== 'loading' && filtered.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-24 text-slate-400">
-            <p className="text-sm">没有匹配的知识点。</p>
-            <button
-              type="button"
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '96px 0' }}>
+            <Empty description="没有匹配的知识点" />
+            <Button
+              type="primary"
+              style={{ marginTop: 16 }}
               onClick={() => {
                 setQuery('')
                 setActiveCategory('all')
               }}
-              className="mt-3 rounded-lg bg-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-300"
             >
               清除筛选
-            </button>
+            </Button>
           </div>
         )}
 
@@ -92,7 +90,7 @@ export default function App() {
         )}
 
         {state !== 'loading' && filtered.length > 0 && activeCategory === 'all' && (
-          <div className="space-y-12">
+          <div>
             {orderedCategories.map((c) => (
               <CategorySection
                 key={c.id}
@@ -104,61 +102,44 @@ export default function App() {
         )}
 
         {state !== 'loading' && query.trim() !== '' && filtered.length > 0 && (
-          <section className="mt-12 border-t border-slate-200 pt-8">
-            <div className="mb-4 flex items-baseline gap-3">
-              <h2 className="text-xl font-bold text-slate-900">搜索结果</h2>
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
-                {filtered.length}
-              </span>
+          <section style={{ marginTop: 48, borderTop: '1px solid #e2e8f0', paddingTop: 32 }}>
+            <div style={{ marginBottom: 16, display: 'flex', alignItems: 'baseline', gap: 12 }}>
+              <Title level={3} style={{ margin: 0 }}>
+                搜索结果
+              </Title>
+              <Text type="secondary">{filtered.length}</Text>
             </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <Row gutter={[16, 16]}>
               {filtered.map((t) => (
-                <TopicCard key={t.id} topic={t} />
+                <Col key={t.id} xs={24} sm={12} lg={8} xl={6}>
+                  <TopicCard topic={t} />
+                </Col>
               ))}
-            </div>
+            </Row>
           </section>
         )}
-      </main>
+      </Content>
 
-      <footer className="border-t border-slate-200 bg-white">
-        <div className="mx-auto max-w-7xl px-6 py-8 text-center text-xs text-slate-400">
-          <p>
-            HBase 动画演示导航 · 数据源{' '}
-            <a
-              href="https://github.com/hbase-hub/hbase-index"
-              target="_blank"
-              rel="noreferrer noopener"
-              className="text-hbase-600 hover:underline"
-            >
-              hbase-index
-            </a>{' '}
-            · 由{' '}
-            <a
-              href="https://github.com/hbase-hub"
-              target="_blank"
-              rel="noreferrer noopener"
-              className="text-hbase-600 hover:underline"
-            >
-              hbase-hub
-            </a>{' '}
-            组织维护
-          </p>
-        </div>
+      <footer
+        style={{
+          borderTop: '1px solid #e2e8f0',
+          background: '#fff',
+          textAlign: 'center',
+          padding: '32px 24px',
+        }}
+      >
+        <Text type="secondary" style={{ fontSize: 12 }}>
+          HBase 动画演示导航 · 数据源{' '}
+          <AntLink href="https://github.com/hbase-hub/hbase-index" target="_blank" rel="noreferrer">
+            hbase-index
+          </AntLink>
+          {' · 由 '}
+          <AntLink href="https://github.com/hbase-hub" target="_blank" rel="noreferrer">
+            hbase-hub
+          </AntLink>
+          {' 组织维护'}
+        </Text>
       </footer>
-    </div>
-  )
-}
-
-function Spinner() {
-  return (
-    <svg className="h-5 w-5 animate-spin text-hbase-500" viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.25" />
-      <path
-        d="M22 12a10 10 0 0 1-10 10"
-        stroke="currentColor"
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
-    </svg>
+    </Layout>
   )
 }

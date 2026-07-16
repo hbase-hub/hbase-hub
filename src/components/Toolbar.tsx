@@ -1,4 +1,7 @@
+import { Input, Segmented, Typography } from 'antd'
 import type { Category } from '../types'
+
+const { Text } = Typography
 
 interface ToolbarProps {
   query: string
@@ -20,81 +23,45 @@ export function Toolbar({
   totalCount,
 }: ToolbarProps) {
   const ordered = [...categories].sort((a, b) => a.order - b.order)
-  return (
-    <div className="sticky top-0 z-20 -mx-6 mb-2 border-b border-slate-200 bg-white/85 px-6 py-3 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl flex-col gap-3">
-        <div className="flex items-center gap-3">
-          <div className="relative flex-1">
-            <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <input
-              type="search"
-              value={query}
-              onChange={(e) => onQueryChange(e.target.value)}
-              placeholder="搜索标题、简介或标签…"
-              aria-label="搜索知识点"
-              className="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-hbase-500 focus:ring-2 focus:ring-hbase-200"
-            />
-          </div>
-          <div className="hidden whitespace-nowrap text-xs text-slate-500 sm:block">
-            匹配 <span className="font-semibold text-slate-700">{matchCount}</span> /{' '}
-            {totalCount}
-          </div>
-        </div>
+  const options = [
+    { label: '全部', value: 'all' },
+    ...ordered.map((c) => ({ label: c.label, value: c.id })),
+  ]
 
-        <div className="flex flex-wrap items-center gap-2">
-          <CategoryTab
-            active={activeCategory === 'all'}
-            onClick={() => onCategoryChange('all')}
-            label="全部"
+  return (
+    <div
+      style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 20,
+        background: 'rgba(255,255,255,0.9)',
+        backdropFilter: 'blur(8px)',
+        borderBottom: '1px solid #e2e8f0',
+        padding: '12px 0',
+        marginBottom: 24,
+      }}
+    >
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+          <Input.Search
+            value={query}
+            onChange={(e) => onQueryChange(e.target.value)}
+            placeholder="搜索标题、简介或标签…"
+            allowClear
+            enterButton={false}
+            style={{ maxWidth: 480, flex: 1, minWidth: 240 }}
           />
-          {ordered.map((c) => (
-            <CategoryTab
-              key={c.id}
-              active={activeCategory === c.id}
-              onClick={() => onCategoryChange(c.id)}
-              label={c.label}
-            />
-          ))}
+          <Text type="secondary" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>
+            匹配 <Text strong>{matchCount}</Text> / {totalCount}
+          </Text>
         </div>
+        <Segmented
+          options={options}
+          value={activeCategory}
+          onChange={(v) => onCategoryChange(v as string | 'all')}
+          size="middle"
+        />
       </div>
     </div>
-  )
-}
-
-function CategoryTab({
-  active,
-  onClick,
-  label,
-}: {
-  active: boolean
-  onClick: () => void
-  label: string
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={
-        'rounded-full px-3 py-1 text-xs font-medium transition ' +
-        (active
-          ? 'bg-hbase-600 text-white shadow-sm'
-          : 'bg-slate-100 text-slate-600 hover:bg-slate-200')
-      }
-    >
-      {label}
-    </button>
-  )
-}
-
-function SearchIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden>
-      <path
-        d="m18 18-4-4m1-5a6 6 0 1 1-12 0 6 6 0 0 1 12 0Z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-    </svg>
   )
 }

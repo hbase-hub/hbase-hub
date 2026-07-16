@@ -1,5 +1,8 @@
+import { Row, Col, Tag, Typography } from 'antd'
 import type { Category, Topic } from '../types'
 import { TopicCard } from './TopicCard'
+
+const { Title, Paragraph } = Typography
 
 interface CategorySectionProps {
   category: Category
@@ -9,21 +12,27 @@ interface CategorySectionProps {
 export function CategorySection({ category, topics }: CategorySectionProps) {
   if (topics.length === 0) return null
   return (
-    <section className="scroll-mt-32" id={`category-${category.id}`}>
-      <div className="mb-4 flex items-baseline gap-3">
-        <h2 className="text-xl font-bold text-slate-900">{category.label}</h2>
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
+    <section id={`category-${category.id}`} style={{ scrollMarginTop: 140 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 4 }}>
+        <Title level={3} style={{ margin: 0 }}>
+          {category.label}
+        </Title>
+        <Tag color="green" style={{ margin: 0 }}>
           {topics.length} 个知识点
-        </span>
+        </Tag>
       </div>
       {category.description && (
-        <p className="mb-4 -mt-2 text-sm text-slate-500">{category.description}</p>
+        <Paragraph type="secondary" style={{ marginTop: 4, marginBottom: 16 }}>
+          {category.description}
+        </Paragraph>
       )}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <Row gutter={[16, 16]} style={{ marginBottom: 48 }}>
         {topics.map((t) => (
-          <TopicCard key={t.id} topic={t} />
+          <Col key={t.id} xs={24} sm={12} lg={8} xl={6}>
+            <TopicCard topic={t} />
+          </Col>
         ))}
-      </div>
+      </Row>
     </section>
   )
 }
